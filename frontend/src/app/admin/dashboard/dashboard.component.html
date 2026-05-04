@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-emi-gray font-sans">
+  <!-- Top Navigation -->
+  <header class="bg-emi-blue shadow-md py-4 px-6 md:px-12 flex justify-between items-center text-white sticky top-0 z-50">
+    <div class="flex items-center space-x-3">
+      <div class="font-black text-2xl tracking-tight">EMI<span class="text-emi-accent">Admin</span></div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <a routerLink="/chat" class="text-sm font-medium opacity-80 hover:opacity-100 flex items-center transition-opacity">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+        Tester Chatbot
+      </a>
+      <a routerLink="/admin/login" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition-colors">Déconnexion</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold text-emi-dark">Base de Connaissances</h1>
+      <div *ngIf="isLoading" class="animate-spin rounded-full h-6 w-6 border-b-2 border-emi-accent"></div>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Form Panel -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+          <h2 class="text-lg font-bold text-gray-800 mb-6 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-emi-accent" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+            {{ editingId ? 'Modifier l\'entrée' : 'Ajouter une entrée' }}
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Question Attendue</label>
+              <textarea [(ngModel)]="newQuestion" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emi-accent focus:border-emi-accent outline-none transition-all placeholder-gray-400 resize-none text-sm" placeholder="Ex: Quelles sont les horaires ?"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Réponse du Chatbot</label>
+              <textarea [(ngModel)]="newAnswer" rows="5" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emi-accent focus:border-emi-accent outline-none transition-all placeholder-gray-400 resize-none text-sm" placeholder="La réponse détaillée que le bot devra fournir."></textarea>
+            </div>
+            
+            <div class="flex space-x-3 pt-2">
+              <button (click)="saveKnowledge()" [disabled]="!newQuestion || !newAnswer || isLoading"
+                class="flex-1 bg-emi-accent hover:bg-emi-blue text-white py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 text-sm shadow-sm">
+                {{ editingId ? 'Mettre à jour' : 'Sauvegarder' }}
+              </button>
+              <button *ngIf="editingId" (click)="resetForm()"
+                class="px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors text-sm">
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Panel -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+              <thead class="bg-gray-50 uppercase text-gray-500 font-semibold text-xs tracking-wider border-b border-gray-100">
+                <tr>
+                  <th scope="col" class="px-6 py-4">ID</th>
+                  <th scope="col" class="px-6 py-4 w-1/3">Question</th>
+                  <th scope="col" class="px-6 py-4 w-1/2">Réponse</th>
+                  <th scope="col" class="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-gray-700">
+                <tr *ngFor="let k of knowledges" class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 font-mono text-xs text-gray-400">#{{ k.id }}</td>
+                  <td class="px-6 py-4 whitespace-normal">
+                    <div class="line-clamp-2 font-medium">{{ k.question }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-normal">
+                    <div class="line-clamp-2 text-gray-500">{{ k.answer }}</div>
+                  </td>
+                  <td class="px-6 py-4 text-right space-x-2">
+                    <button (click)="editKnowledge(k)" class="text-emi-accent hover:text-emi-blue font-medium transition-colors">Éditer</button>
+                    <span class="text-gray-300">|</span>
+                    <button (click)="deleteKnowledge(k.id)" class="text-red-500 hover:text-red-600 font-medium transition-colors">Suppr.</button>
+                  </td>
+                </tr>
+                <tr *ngIf="knowledges.length === 0 && !isLoading">
+                  <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    Aucune connaissance enregistrée.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+</div>
