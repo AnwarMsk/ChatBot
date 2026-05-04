@@ -1,0 +1,46 @@
+<div class="min-h-screen bg-emi-gray flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
+  
+  <!-- Glowing shapes -->
+  <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-emi-accent rounded-full mix-blend-multiply filter blur-[80px] opacity-40"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-emi-blue rounded-full mix-blend-multiply filter blur-[80px] opacity-40"></div>
+
+  <div class="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-white/40 z-10">
+    <div>
+      <div class="mx-auto h-16 w-16 bg-emi-blue rounded-full flex justify-center items-center font-bold text-white text-2xl shadow-lg">EMI</div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-emi-dark">
+        Espace Administrateur
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-500">
+        Gérez la base de connaissances
+      </p>
+    </div>
+    
+    <div class="mt-8 space-y-6">
+      <div class="rounded-md shadow-sm -space-y-px">
+        <div>
+          <label for="password" class="sr-only">Mot de passe</label>
+          <input id="password" name="password" type="password" [(ngModel)]="password" (keyup.enter)="login()" required 
+            class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emi-accent focus:border-emi-accent focus:z-10 sm:text-sm bg-white/50 backdrop-blur-sm" 
+            placeholder="Mot de passe">
+        </div>
+      </div>
+
+      <div *ngIf="error" class="text-red-500 text-sm text-center">
+        {{ error }}
+      </div>
+
+      <div>
+        <button (click)="login()" 
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-emi-blue hover:bg-emi-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emi-accent shadow-md transition-colors">
+          Se connecter
+        </button>
+      </div>
+
+      <div class="flex items-center justify-center">
+        <a routerLink="/chat" class="font-medium text-emi-accent hover:text-emi-blue text-sm transition-colors">
+          ← Retour au Chatbot
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+/* Ajoute des comportements fluides spécifiques non pris en compte par Tailwind si nécessaire */
+/* Par exemple, une scrollbar personnalisée si non installée via plugin Tailwind */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.2);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.4);
+}
