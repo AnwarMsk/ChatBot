@@ -1,0 +1,52 @@
+[
+  {
+    "keyword": "inscription",
+    "question": "Comment s'inscrire à l'université ?",
+    "reponse": "Pour vous inscrire, rendez-vous sur le portail étudiant avec votre baccalauréat et pièce d'identité. Les inscriptions ouvrent en juillet."
+  },
+  {
+    "keyword": "bourse",
+    "question": "Comment obtenir une bourse ?",
+    "reponse": "Les demandes de bourses se font en ligne sur le portail du CNOPS avant le 30 septembre. Vous devez fournir un justificatif de revenus parentaux."
+  },
+  {
+    "keyword": "examen",
+    "question": "Quand ont lieu les examens ?",
+    "reponse": "Les examens de la session normale se déroulent en janvier pour le S1 et en juin pour le S2. Les rattrapages ont lieu en juillet."
+  },
+  {
+    "keyword": "emploi du temps",
+    "question": "Où trouver l'emploi du temps ?",
+    "reponse": "L'emploi du temps est disponible sur le portail étudiant ou affiché dans votre département en début de semestre."
+  },
+  {
+    "keyword": "carte étudiante",
+    "question": "Comment obtenir sa carte étudiante ?",
+    "reponse": "La carte étudiante est délivrée par la scolarité après validation de votre inscription administrative. Présentez-vous avec une photo d'identité."
+  },
+  {
+    "keyword": "bibliothèque",
+    "question": "Quels sont les horaires de la bibliothèque ?",
+    "reponse": "La bibliothèque est ouverte du lundi au vendredi de 8h à 18h, et le samedi de 9h à 13h."
+  },
+  {
+    "keyword": "résultat",
+    "question": "Comment consulter ses résultats ?",
+    "reponse": "Vos résultats sont publiés sur le portail étudiant après délibération du jury, généralement 2 semaines après les examens."
+  },
+  {
+    "keyword": "attestation",
+    "question": "Comment obtenir une attestation de scolarité ?",
+    "reponse": "Les attestations de scolarité sont délivrées par la scolarité sur simple demande, du lundi au jeudi de 9h à 12h."
+  },
+  {
+    "keyword": "transfert",
+    "question": "Comment effectuer un transfert vers une autre université ?",
+    "reponse": "Le transfert nécessite une demande écrite adressée au doyen, accompagnée de votre relevé de notes et d'une lettre de motivation."
+  },
+  {
+    "keyword": "absence",
+    "question": "Que faire en cas d'absence aux examens ?",
+    "reponse": "En cas d'absence justifiée (maladie, etc.), vous devez fournir un justificatif dans les 48h au secrétariat pour pouvoir passer la session de rattrapage."
+  }
+]
