@@ -1,38 +1,14 @@
 from flask import Flask, request, jsonify
-from nlp_engine import NLPEngine
-from db import get_all_faqs
+from pgvector_engine import PgVectorEngine
 
 app = Flask(__name__)
 
-engine = NLPEngine(seuil_similarite=0.3)
-
-
-def initialiser_moteur():
-    print("[DÉMARRAGE] Chargement des FAQs depuis Oracle...")
-    try:
-        faqs = get_all_faqs()
-        engine.charger_faqs(faqs)
-        print("[DÉMARRAGE] Moteur NLP prêt.")
-    except Exception as e:
-        print(f"[ERREUR] Impossible de charger les FAQs : {e}")
-        print("[INFO] Utilisation des FAQs de secours (mode hors-ligne).")
-        _charger_faqs_fallback()
-
-
-def _charger_faqs_fallback():
-    import json
-    try:
-        with open("data/faq_universitaire.json", "r", encoding="utf-8") as f:
-            faqs = json.load(f)
-        engine.charger_faqs(faqs)
-        print("[INFO] FAQs chargées depuis le fichier JSON local.")
-    except Exception as e:
-        print(f"[ERREUR] Impossible de charger le fichier JSON : {e}")
+# V3 : moteur pgvector (recherche sémantique via PostgreSQL)
+engine = PgVectorEngine(seuil_similarite=0.4)
 
 
 @app.route("/ask", methods=["POST"])
 def ask():
-
     data = request.get_json()
 
     if not data or "question" not in data:
@@ -52,22 +28,50 @@ def ask():
 
 @app.route("/reload", methods=["POST"])
 def reload_faqs():
+    """
+    Re-génère les embeddings depuis la base de données.
+    À appeler après avoir ajouté ou modifié des FAQs via l'admin dashboard.
+    """
     try:
-        faqs = get_all_faqs()
-        engine.charger_faqs(faqs)
-        return jsonify({"message": f"{len(faqs)} FAQs rechargées avec succès."}), 200
+        from sentence_transformers import SentenceTransformer
+        from db import get_connection
+        import numpy as np
+
+        model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id, question FROM faqs ORDER BY id")
+        faqs = cursor.fetchall()
+
+        for faq_id, question in faqs:
+            embedding = model.encode(question, normalize_embeddings=True)
+            cursor.execute(
+                "UPDATE faqs SET embedding = %s WHERE id = %s",
+                (embedding, faq_id)
+            )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": f"{len(faqs)} embeddings régénérés avec succès."}), 200
+
     except Exception as e:
         return jsonify({"erreur": str(e)}), 500
 
+
 @app.route("/health", methods=["GET"])
 def health():
-    nb_faqs = len(engine.faqs)
     return jsonify({
-        "status": "ok",
-        "faqs_chargees": nb_faqs,
-        "moteur_pret": nb_faqs > 0
+        "status":  "ok",
+        "moteur":  "pgvector",
+        "modele":  "paraphrase-multilingual-MiniLM-L12-v2",
+        "seuil":   engine.seuil
     }), 200
 
+
 if __name__ == "__main__":
-    initialiser_moteur()
+    print("[DÉMARRAGE] Chatbot Universitaire EMI — V3 pgvector")
+    print("[DÉMARRAGE] Chargement du modèle sentence-transformers...")
     app.run(host="0.0.0.0", port=5000, debug=True)

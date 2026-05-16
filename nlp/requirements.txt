@@ -1,6 +1,10 @@
-flask==3.0.3
+flask>=3.0.3
 psycopg2-binary>=2.9.0
-spacy==3.7.4
-scikit-learn==1.4.2
-numpy==1.26.4
-python-dotenv==1.0.1
+spacy
+scikit-learn
+numpy
+python-dotenv>=1.0.1
+
+# V3 — pgvector semantic search
+sentence-transformers>=3.0.0
+pgvector>=0.3.0
