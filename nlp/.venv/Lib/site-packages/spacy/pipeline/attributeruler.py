@@ -1,3 +1,4 @@
+import importlib
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -12,27 +13,16 @@ from ..symbols import IDS
 from ..tokens import Doc, Span
 from ..tokens._retokenize import normalize_token_attrs, set_token_attrs
 from ..training import Example
-from ..util import SimpleFrozenList, registry
+from ..util import SimpleFrozenList
 from ..vocab import Vocab
 from .pipe import Pipe
 
 MatcherPatternType = List[Dict[Union[int, str], Any]]
-AttributeRulerPatternType = Dict[str, Union[MatcherPatternType, Dict, int]]
+AttributeRulerPatternType = Dict[
+    str, Union[List[MatcherPatternType], MatcherPatternType, Dict, int]
+]
 TagMapType = Dict[str, Dict[Union[int, str], Union[int, str]]]
 MorphRulesType = Dict[str, Dict[str, Dict[Union[int, str], Union[int, str]]]]
-
-
-@Language.factory(
-    "attribute_ruler",
-    default_config={
-        "validate": False,
-        "scorer": {"@scorers": "spacy.attribute_ruler_scorer.v1"},
-    },
-)
-def make_attribute_ruler(
-    nlp: Language, name: str, validate: bool, scorer: Optional[Callable]
-):
-    return AttributeRuler(nlp.vocab, name, validate=validate, scorer=scorer)
 
 
 def attribute_ruler_score(examples: Iterable[Example], **kwargs) -> Dict[str, Any]:
@@ -54,7 +44,6 @@ def attribute_ruler_score(examples: Iterable[Example], **kwargs) -> Dict[str, An
     return results
 
 
-@registry.scorers("spacy.attribute_ruler_scorer.v1")
 def make_attribute_ruler_scorer():
     return attribute_ruler_score
 
@@ -149,7 +138,8 @@ class AttributeRuler(Pipe):
         matches = self.matcher(doc, allow_missing=True, as_spans=False)
         # Sort by the attribute ID, so that later rules have precedence
         matches = [
-            (int(self.vocab.strings[m_id]), m_id, s, e) for m_id, s, e in matches  # type: ignore
+            (int(self.vocab.strings[m_id]), m_id, s, e)
+            for m_id, s, e in matches  # type: ignore
         ]
         matches.sort()
         return matches
@@ -355,3 +345,11 @@ def _split_morph_attrs(attrs: dict) -> Tuple[dict, dict]:
         else:
             morph_attrs[k] = v
     return other_attrs, morph_attrs
+
+
+# Setup backwards compatibility hook for factories
+def __getattr__(name):
+    if name == "make_attribute_ruler":
+        module = importlib.import_module("spacy.pipeline.factories")
+        return module.make_attribute_ruler
+    raise AttributeError(f"module {__name__} has no attribute {name}")

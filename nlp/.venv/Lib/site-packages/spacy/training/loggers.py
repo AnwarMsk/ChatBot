@@ -8,7 +8,6 @@ from wasabi import Printer
 
 from .. import util
 from ..errors import Errors
-from ..util import registry
 
 if TYPE_CHECKING:
     from ..language import Language  # noqa: F401
@@ -29,7 +28,6 @@ def setup_table(
 
 # We cannot rename this method as it's directly imported
 # and used by external packages such as spacy-loggers.
-@registry.loggers("spacy.ConsoleLogger.v2")
 def console_logger(
     progress_bar: bool = False,
     console_output: bool = True,
@@ -47,7 +45,6 @@ def console_logger(
     )
 
 
-@registry.loggers("spacy.ConsoleLogger.v3")
 def console_logger_v3(
     progress_bar: Optional[str] = None,
     console_output: bool = True,
@@ -178,7 +175,7 @@ def console_logger_v3(
                         initial = info["step"]
                     else:
                         total = eval_frequency
-                        desc = f"Epoch {info['epoch']+1}"
+                        desc = f"Epoch {info['epoch'] + 1}"
                         initial = 0
                     # Set disable=None, so that it disables on non-TTY
                     progress = tqdm.tqdm(

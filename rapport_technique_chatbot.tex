@@ -1,0 +1,548 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages de base ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+% --- Graphiques et Diagrammes ---
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, shadows}
+
+% --- Mathématiques ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- Tableaux ---
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+
+% --- Code Source ---
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- En-têtes et Pieds de page ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{15pt}
+\fancyhead[L]{\small Chatbot EMI --- Rapport Technique}
+\fancyhead[R]{\small\leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% --- Hyperliens ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Rapport Technique - Chatbot Intelligent d'Assistance Universitaire},
+    pdfpagemode=FullScreen,
+}
+
+% --- Commandes personnalisées pour symboles ---
+\newcommand{\cross}{\textcolor{red!80!black}{\textbf{\textsf{X}}}}
+\newcommand{\checkmarktext}{\textcolor{green!60!black}{\checkmark}}
+
+% --- Configuration des couleurs pour listings ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.1,0.1,0.9}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+\lstset{style=mystyle}
+
+% --- Redéfinition du style des chapitres ---
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{blue!60!black}}{\thesubsection}{1em}{}
+
+% --- Informations du document ---
+% (La structure de la page de garde est definie directement via un environnement titlepage)
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    
+    % --- En-tete avec les logos ---
+    \begin{minipage}{0.48\textwidth}
+        \begin{flushleft}
+            \includegraphics[height=2.2cm]{logo_um5.png}
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \begin{flushright}
+            \includegraphics[height=2.2cm]{logo_emi.png}
+        \end{flushright}
+    \end{minipage}
+    
+    \vspace{0.6cm}
+    {\large \textbf{Université Mohammed V - Rabat}} \\
+    {\large \textbf{École Mohammadia d'Ingénieurs}} \\
+    
+    \vspace{0.4cm}
+    \hrule height 1.5pt
+    \vspace{2cm}
+    
+    % --- Titre du Projet ---
+    {\color{blue!80!black} \Huge \bfseries RAPPORT TECHNIQUE} \\[0.4cm]
+    {\color{blue!80!black} \Huge \bfseries D'INGÉNIERIE} \\[0.8cm]
+    
+    \noindent\makebox[\linewidth]{\rule{8cm}{0.8pt}}
+    \vspace{0.8cm}
+    
+    {\color{gray!90!black} \Large \bfseries Chatbot Intelligent d'Assistance Universitaire} \\[0.4cm]
+    {\large \itshape Évolutions Architecturales : De la V1 (Mots-clés) à la V3 (pgvector \& Embeddings)} \\
+    
+    \vspace{2.5cm}
+    
+    % --- Cadre des Auteurs ---
+    \begin{minipage}{0.7\textwidth}
+        \centering
+        \textbf{\large Réalisé par :}\\[0.3cm]
+        \begin{tabular}{cc}
+            \textbf{ARHERHOUR} Elias & \quad \textbf{MAHDAD} Jihad \\
+            \textbf{MESKIOUI} Anwar & \quad \textbf{JDAIRI} Yasser \\
+        \end{tabular}
+    \end{minipage}
+    
+    \vfill
+    
+    % --- Pied de page ---
+    \hrule height 1pt
+    \vspace{0.4cm}
+    {\large Année Universitaire : 2025 - 2026} \\
+    {\large 13 juin 2026}
+    
+\end{titlepage}
+\clearpage
+
+
+\tableofcontents
+\clearpage
+
+% ==========================================
+\section[Introduction]{Introduction et Contexte}
+% ==========================================
+
+Dans le milieu universitaire moderne, l'accès rapide et fiable aux informations administratives et académiques est un enjeu majeur pour les étudiants. Les canaux traditionnels (secrétariats physiques, panneaux d'affichage, courriels) sont souvent saturés ou peu réactifs, en particulier lors des périodes charnières comme la rentrée ou les sessions d'examens.
+
+Ce projet vise à concevoir et implémenter un \textbf{Chatbot Intelligent d'Assistance Universitaire} disponible 24h/24 et 7j/7, capable de répondre instantanément aux interrogations récurrentes des étudiants concernant la scolarité, les examens, les bourses (notamment la bourse Minhaty), la bibliothèque et les services médicaux.
+
+Afin de garantir une démarche de développement logiciel rigoureuse, le projet a été conçu selon un cycle incrémental en trois versions majeures :
+\begin{itemize}
+    \item \textbf{Version 1 (Prototype déterministe)} : Validation de l'architecture client-serveur de base (Angular / Spring Boot) et persistance SQL par appariement strict de mots-clés.
+    \item \textbf{Version 2 (Moteur NLP lexical)} : Introduction du traitement du langage naturel (NLP) avec spaCy et modélisation vectorielle TF-IDF locale (en RAM).
+    \item \textbf{Version 3 (Recherche sémantique vectorielle database)} : Migration vers une architecture moderne d'embeddings denses avec \textbf{pgvector} dans PostgreSQL et modèle de Deep Learning multilingue, assurant scalabilité et résilience.
+\end{itemize}
+
+Le présent rapport détaille les choix de conception, les fondements mathématiques et algorithmiques ainsi que les choix technologiques sous-tendant chacune de ces versions.
+
+\clearpage
+
+% ==========================================
+\section[V1 : Prototype Mots-clés]{Version 1 : Le Prototype Déterministe (Mots-clés)}
+% ==========================================
+
+La première phase du projet avait pour but d'établir la chaîne de communication de bout en bout (Frontend $\leftrightarrow$ Backend $\leftrightarrow$ Base de Données) à travers une logique de recherche déterministe basée sur des correspondances exactes de mots-clés.
+
+\subsection{Architecture Frontend (Angular)}
+L'interface utilisateur a été conçue sous le framework \textbf{Angular}, choisi pour sa robustesse, sa modularité (architecture orientée composants et services) et son binding bidirectionnel natif.
+
+\begin{itemize}
+    \item \textbf{Composants clés} :
+    \begin{itemize}
+        \item \texttt{ChatbotComponent} : Gère l'affichage dynamique de la discussion, l'historique des messages et la saisie utilisateur. Il intègre un \textit{typing indicator} (indicateur de frappe animé) afin d'améliorer l'expérience conversationnelle en simulant visuellement un temps de traitement.
+        \item \texttt{DashboardComponent} : Panel d'administration protégé permettant le suivi global de l'application et des statistiques.
+    \end{itemize}
+    \item \textbf{Esthétique et UI/UX} : Intégration de \textbf{Tailwind CSS} et application d'une charte graphique moderne basée sur le \textit{Glassmorphism} (effets de transparence translucides), optimisée pour un affichage adaptatif (responsive) sur terminaux mobiles. Le temps de réponse cible du système est fixé à $\le 3$ secondes.
+    \item \textbf{Communication Asynchrone} : Utilisation du module \texttt{HttpClient} combiné aux observables de \textbf{RxJS}. Un proxy local (\texttt{proxy.conf.json}) a été mis en œuvre pour rediriger de manière transparente les requêtes de l'API Angular (port 4200) vers le backend Spring Boot (port 8080) sans déclencher d'erreurs CORS en phase de développement.
+    \item \textbf{Sécurité Client} : Protection de l'accès au tableau de bord d'administration par des gardes de navigation (\texttt{AuthGuard}).
+\end{itemize}
+
+\subsection{Architecture Backend (Spring Boot)}
+Le backend repose sur \textbf{Spring Boot 3.x} et \textbf{Java 23}, offrant un environnement serveur hautement performant et structuré selon le pattern MVC (Modèle-Vue-Contrôleur) stateless.
+
+\begin{itemize}
+    \item \textbf{Configuration} : La configuration de la base de données distante est centralisée dans le fichier \texttt{application.properties}.
+    \item \textbf{Persistance} : Utilisation de \textbf{Spring Data JPA} / Hibernate pour abstraire l'accès aux données sous forme d'entités Java.
+    \item \textbf{REST Controller} : Le \texttt{ChatController} expose l'endpoint \texttt{/api/chatbot/ask} acceptant des requêtes POST contenant la question au format JSON. La logique V1 interroge la base de données par mot-clé :
+\end{itemize}
+
+\begin{lstlisting}[language=Java, caption=Logique V1 du ChatController Spring Boot]
+@RestController
+@RequestMapping("/api/chatbot")
+@CrossOrigin(origins = "http://localhost:4200")
+public class ChatController {
+
+    @Autowired
+    private FaqRepository faqRepository;
+
+    @PostMapping("/ask")
+    public Map<String, String> handleQuestion(@RequestBody Map<String, String> payload) {
+        String question = payload.get("question").toLowerCase();
+        
+        // Logique de recherche par mot-cle (V1)
+        String botResponse = faqRepository.findAnswerByKeyword(question);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("answer", botResponse != null ? botResponse : "Desole, je n'ai pas compris.");
+        return response;
+    }
+}
+\end{lstlisting}
+
+\subsection{Base de Données Relationnelle (PostgreSQL)}
+Le choix du Système de Gestion de Base de Données (SGBD) s'est porté sur \textbf{PostgreSQL}. Ce choix est une décision d'ingénierie anticipative : PostgreSQL intègre l'extension \texttt{pgvector}, indispensable pour la transition vers le stockage de représentations vectorielles dans la version V3, évitant ainsi une migration coûteuse de SGBD à mi-projet.
+
+\begin{itemize}
+    \item \textbf{Conteneurisation} : Le déploiement est orchestré dans un conteneur isolé via \textbf{Docker Compose}, garantissant la reproductibilité stricte de l'environnement de développement (PostgreSQL 15).
+    \item \textbf{Modélisation de Données (Normalisation)} : Afin de supporter plusieurs mots-clés de déclenchement pour une même FAQ sans redondance, nous avons modélisé une relation Many-to-Many entre les tables \texttt{faqs} et \texttt{keywords} à l'aide d'une table de jonction \texttt{faq\_keywords}.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=4cm,
+    >=stealth,
+    entity/.style={draw, rectangle, fill=blue!10, rounded corners, minimum height=1.5cm, text width=3cm, align=left},
+    link_entity/.style={draw, rectangle, fill=purple!10, rounded corners, minimum height=1.5cm, text width=3.2cm, align=left},
+    keyword_entity/.style={draw, rectangle, fill=green!10, rounded corners, minimum height=1.5cm, text width=3cm, align=left}
+]
+    \node (faqs) [entity] {{\centering\textbf{faqs}\par}\hrule \vspace{0.1cm} \small id (PK) \\ question \\ answer};
+    \node (link) [link_entity, right=1.5cm of faqs] {{\centering\textbf{faq\_keywords}\par}\hrule \vspace{0.1cm} \small faq\_id (FK) \\ keyword\_id (FK)};
+    \node (keys) [keyword_entity, right=1.5cm of link] {{\centering\textbf{keywords}\par}\hrule \vspace{0.1cm} \small id (PK) \\ word};
+    
+    \draw [->, thick] (link.west) -- (faqs.east) node [midway, above=1pt] {\small $N:1$};
+    \draw [->, thick] (link.east) -- (keys.west) node [midway, above=1pt] {\small $N:1$};
+\end{tikzpicture}
+\caption{Diagramme Entité-Relation normalisé de la BDD du prototype V1}
+\end{figure}
+
+
+Les contraintes de clé étrangère sont définies avec l'instruction \texttt{ON DELETE CASCADE} pour préserver l'intégrité référentielle en cas de suppression d'une FAQ. L'extraction de la réponse s'effectue via une jointure SQL interne :
+
+\begin{lstlisting}[language=SQL, caption=Requête d'extraction par mot-clé (V1)]
+SELECT f.answer 
+FROM faqs f
+JOIN faq_keywords fk ON f.id = fk.faq_id
+JOIN keywords k ON fk.keyword_id = k.id
+WHERE k.word = ?;
+\end{lstlisting}
+
+\clearpage
+
+% ==========================================
+\section[V2 : Moteur NLP TF-IDF]{Version 2 : L'Évolution vers le Traitement du Langage Naturel (TF-IDF)}
+% ==========================================
+
+Le prototype V1, bien que fonctionnel, souffre d'une rigidité critique : si l'étudiant formule sa question différemment (ex. : \textit{«~Je voudrais des informations sur l'inscription~»} au lieu du mot-clé exact \textit{«~inscription~»}), le chatbot échoue. La V2 introduit le traitement du langage naturel (NLP) et la recherche par similarité lexicale.
+
+\subsection{Fondements Théoriques de la V2}
+
+Le traitement s'organise autour d'un pipeline de préparation linguistique suivi d'un calcul de pertinence statistique.
+
+\subsubsection{Prétraitement Linguistique (spaCy)}
+Afin de nettoyer les textes des bruits linguistiques, nous utilisons la bibliothèque industrielle \textbf{spaCy} avec le modèle de langue française \texttt{fr\_core\_news\_sm}. Le prétraitement comprend :
+\begin{enumerate}
+    \item \textbf{Tokenisation} : Segmentation du texte en unités lexicales (mots).
+    \item \textbf{Lemmatisation} : Réduction des mots à leur forme canonique ou dictionnaire (ex. : \textit{«~examens~»} $\rightarrow$ \textit{«~examen~»}, \textit{«~inscrire~»} $\rightarrow$ \textit{«~inscrire~»}).
+    \item \textbf{Filtrage des Stop Words} : Suppression des mots outils n'apportant pas de valeur sémantique (ex. : \textit{«~comment~», «~je~», «~le~», «~est~»}).
+    \item \textbf{Nettoyage} : Retrait de la ponctuation et des caractères isolés.
+\end{enumerate}
+
+\subsubsection{Le Modèle TF-IDF}
+Le modèle \textbf{TF-IDF} (\textit{Term Frequency - Inverse Document Frequency}) est utilisé pour vectoriser les textes en pondérant l'importance de chaque mot au sein d'un document relativement à un corpus global.
+\begin{itemize}
+    \item \textbf{Term Frequency (TF)} : Mesure la fréquence d'apparition d'un terme $t$ dans un document (une question de FAQ) $d$.
+    \[ \text{TF}(t, d) = \frac{f_{t,d}}{\sum_{t' \in d} f_{t',d}} \]
+    \item \textbf{Inverse Document Frequency (IDF)} : Évalue l'importance générale du terme dans l'ensemble du corpus $D$. Les mots rares obtiennent un poids plus élevé.
+    \[ \text{IDF}(t, D) = \log\left(\frac{|D|}{|\{d \in D : t \in d\}|}\right) \]
+    \item \textbf{Score TF-IDF} :
+    \[ \text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \text{IDF}(t, D) \]
+\end{itemize}
+
+\subsubsection{La Similarité Cosinus}
+Chaque question de FAQ et la question de l'utilisateur sont représentées par des vecteurs de scores TF-IDF. La similarité entre la question de l'utilisateur $U$ et une question de la base $V$ est évaluée via le cosinus de l'angle $\theta$ formé par ces deux vecteurs dans l'espace vectoriel :
+\[ \text{Similarité}(U, V) = \cos(\theta) = \frac{U \cdot V}{\|U\| \|V\|} = \frac{\sum_{i=1}^{n} U_i V_i}{\sqrt{\sum_{i=1}^{n} U_i^2} \sqrt{\sum_{i=1}^{n} V_i^2}} \]
+Un score proche de $1.0$ indique des textes très similaires lexicalement ; un score proche de $0.0$ indique une absence de mots partagés. Un seuil de similarité minimal de $0.3$ a été défini pour valider une réponse.
+
+\subsection{Architecture du Microservice Python}
+La logique NLP ayant été implémentée en Python, nous avons configuré un microservice indépendant développé avec le micro-framework \textbf{Flask}, structuré de manière modulaire :
+
+\begin{itemize}
+    \item \texttt{nlp\_engine.py} : Contient la logique d'analyse linguistique (spaCy) et de vectorisation/calcul de similarité (via \textbf{scikit-learn}).
+    \item \texttt{db.py} : Connexion à la base PostgreSQL à l'aide de \texttt{psycopg2} pour charger dynamiquement les FAQs au lancement.
+    \item \texttt{app.py} : API REST exposant les routes \texttt{/ask} (recherche), \texttt{/reload} (rechargement des FAQs en cours d'exécution) et \texttt{/health}.
+\end{itemize}
+
+\subsection{Limites Majeures de l'Approche V2}
+Bien que supérieure à la V1, l'architecture V2 présente deux inconvénients bloquants :
+\begin{enumerate}
+    \item \textbf{Problème de Scalabilité (RAM)} : Au démarrage du serveur Flask, le système doit extraire toutes les FAQs de la base de données PostgreSQL et les charger en mémoire vive pour effectuer les calculs de similarité matricielle dans Python. Pour un système de grande envergure (des milliers de FAQs), la consommation de RAM devient prohibitive.
+    \item \textbf{Limitation Lexicale} : TF-IDF repose uniquement sur la cooccurrence de mots exacts. Si un étudiant pose la question \textit{«~aide financière étudiant~»} et que la base contient \textit{«~Comment postuler pour la bourse Minhaty ?~»}, le modèle ne fera pas le rapprochement sémantique car les mots \textit{«~aide~», «~financière~»} et \textit{«~bourse~», «~Minhaty~»} n'ont aucun lien orthographique ou dictionnaire direct.
+\end{enumerate}
+
+\clearpage
+
+% ==========================================
+\section[V3 : Recherche Sémantique]{Version 3 : L'Architecture Sémantique Vectorielle (pgvector)}
+% ==========================================
+
+Pour surmonter les limitations de la V2, la Version 3 introduit une architecture sémantique moderne basée sur les \textbf{embeddings denses} de Deep Learning et la recherche vectorielle externalisée dans la base de données via l'extension \textbf{pgvector}.
+
+\subsection{Fondements Théoriques de la V3}
+
+\subsubsection{Les Embeddings Sémantiques}
+Contrairement au TF-IDF qui génère des vecteurs creux et de grande taille dépendant du vocabulaire du corpus, un embedding dense est un vecteur de taille fixe (384 réels dans notre cas) où chaque dimension représente un concept latent extrait par un réseau de neurones. Deux phrases synonymes seront projetées dans des zones très proches de cet espace multidimensionnel, peu importe la formulation exacte de la phrase.
+
+\subsubsection{Le Modèle sentence-transformers}
+Nous utilisons le modèle pré-entraîné de pointe \textbf{\texttt{paraphrase-multilingual-MiniLM-L12-v2}} basé sur l'architecture Transformer distillée. Ses spécifications sont :
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Caractéristique} & \textbf{Spécification} \\
+\midrule
+Modèle de base & MiniLM (12 couches distillees) \\
+Dimension de l'embedding & 384 dimensions \\
+Langues supportées & 50+ (dont le français, l'arabe et l'anglais) \\
+Poids du modèle en mémoire & $\sim 420$ Mo \\
+Vitesse d'exécution & Rapide sur CPU ($\sim 14$k tokens par seconde) \\
+\bottomrule
+\end{tabular}
+\caption{Spécifications du modèle sémantique V3}
+\end{table}
+
+\subsection{Externalisation Vectorielle : pgvector et HNSW}
+Plutôt que d'effectuer la recherche en mémoire RAM dans le script Python, nous déléguons la recherche et l'indexation directement au moteur de base de données PostgreSQL grâce à \textbf{pgvector}.
+
+\subsubsection{Configuration du Schéma SQL}
+Le script d'initialisation \texttt{setup\_pgvector.py} active l'extension vectorielle et ajoute une colonne d'embeddings de dimension 384 à la table \texttt{faqs} :
+\begin{lstlisting}[language=SQL, caption=Modification du schéma SQL pour pgvector]
+-- Etape 1 : Activation de l'extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Etape 2 : Ajout de la colonne d'embeddings
+ALTER TABLE faqs ADD COLUMN IF NOT EXISTS embedding vector(384);
+\end{lstlisting}
+
+\subsubsection{L'Indexation HNSW (Hierarchical Navigable Small World)}
+Pour éviter de comparer la question de l'utilisateur à toutes les lignes de la table \texttt{faqs} de manière séquentielle (complexité $O(N)$), nous créons un index \textbf{HNSW}.
+Le HNSW construit un graphe multicouche reliant les vecteurs. La recherche débute sur les couches supérieures à grands pas ("autoroutes") pour localiser la région globale des plus proches voisins, puis descend dans les couches inférieures pour affiner les correspondances. Cela réduit la complexité de recherche à une complexité quasi-logarithmique $O(\log N)$, rendant le système extrêmement scalable.
+
+\begin{lstlisting}[language=SQL, caption=Création de l'index HNSW dans PostgreSQL]
+CREATE INDEX IF NOT EXISTS faqs_embedding_hnsw_idx
+ON faqs
+USING hnsw (embedding vector_cosine_ops);
+\end{lstlisting}
+L'option \texttt{vector\_cosine\_ops} spécifie que l'index HNSW doit être construit en utilisant la distance cosinus.
+
+\subsection{Architecture Logicielle Découplée et Flux de Requête}
+
+Le rôle du microservice Python a été drastiquement simplifié en V3. Il ne conserve plus aucune FAQ en mémoire RAM et n'effectue pas la recherche lui-même. Il sert uniquement d'agent d'encodage (traducteur texte-vers-vecteur) pour le compte de PostgreSQL.
+
+Le backend Spring Boot agit en tant qu'\textbf{API Gateway} et orchestre la résilience du système. En cas d'indisponibilité ou d'erreur sur le microservice Flask NLP, Spring Boot intercepte l'erreur et bascule automatiquement sur une recherche de secours V1 par mots-clés classiques dans PostgreSQL.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    auto,
+    box/.style={draw, rectangle, fill=blue!10, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, font=\small},
+    db/.style={draw, cylinder, shape border rotate=90, fill=yellow!15, minimum width=2.4cm, minimum height=1.6cm, aspect=0.25, align=center, font=\small},
+    ai/.style={draw, rectangle, fill=green!10, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, font=\small},
+    arrow/.style={-Latex, thick},
+    dashedarrow/.style={-Latex, dashed, thick, red!80!black}
+]
+
+    % Composants
+    \node (angular) [box] {\textbf{Frontend Angular} \\ (Port 4200)};
+    \node (spring) [box, right=2.8cm of angular] {\textbf{Spring Boot Backend} \\ (Port 8080)};
+    \node (flask) [ai, above right=1.2cm and 2.5cm of spring] {\textbf{Flask NLP Service} \\ (Port 5000) \\ \textit{modèle Sentence-Transformer}};
+    \node (postgres) [db, below right=1.2cm and 2.5cm of spring] {\textbf{PostgreSQL} \\ (Port 5432) \\ \textit{Extension pgvector}};
+
+    % Liens flux nominal (deux lignes parallèles pour requêtes aller-retour)
+    \draw [arrow] ($(angular.east)+(0,0.15)$) -- ($(spring.west)+(0,0.15)$) node[midway, above] {\small 1. ask};
+    \draw [arrow] ($(spring.west)-(0,0.15)$) -- ($(angular.east)-(0,0.15)$) node[midway, below] {\small 6. Réponse};
+
+    \draw [arrow] (spring) to [bend left=12] node[midway, above, sloped] {\small 2. POST /ask} (flask);
+    \draw [arrow] (flask) to [bend left=12] node[midway, below, sloped] {\small 5. Réponse JSON} (spring);
+
+    \draw [arrow] (flask) to [bend left=12] node[midway, right=6pt] {\small 3. SQL \texttt{<=>}} (postgres);
+    \draw [arrow] (postgres) to [bend left=12] node[midway, left=6pt] {\small 4. Résultat} (flask);
+
+    % Liens Fallback (courbes vers le bas, slopées pour éviter le chevauchement de la ligne et du texte)
+    \draw [dashedarrow] (spring) to [bend right=15] node[midway, below, sloped] {\small 2bis. Fallback V1} (postgres);
+    \draw [dashedarrow] (postgres) to [bend right=15] node[midway, above, sloped] {\small 3bis. Réponse SQL} (spring);
+
+
+\end{tikzpicture}
+\caption{Architecture découplée V3 avec mécanisme de fallback automatique}
+\end{figure}
+
+\subsection{Implémentation du Code Runtime V3}
+
+\subsubsection{Recherche Vectorielle en Python (Flask / PostgreSQL)}
+Le moteur \texttt{PgVectorEngine} convertit la question utilisateur brute en un embedding normalisé à l'aide du modèle pré-entraîné, puis interroge la base de données.
+
+\begin{lstlisting}[language=Python, caption=Moteur de recherche sémantique V3 (pgvector\_engine.py)]
+class PgVectorEngine:
+    def __init__(self, seuil_similarite: float = 0.4):
+        self.seuil = seuil_similarite
+        self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+    def trouver_reponse(self, question_utilisateur: str) -> dict:
+        # 1. Encodage de la question de l'utilisateur (vecteur normalise)
+        embedding = self.model.encode(question_utilisateur, normalize_embeddings=True)
+
+        # 2. Execution de la requete de similarite cosinus en base
+        resultat = search_by_vector(embedding, seuil=self.seuil)
+
+        if resultat:
+            return {
+                "reponse": resultat["answer"],
+                "score": resultat["score"],
+                "question_matchee": resultat["question"],
+                "trouve": True
+            }
+        else:
+            return {
+                "reponse": "Je n'ai pas trouve de reponse. Contactez la scolarite.",
+                "score": 0.0,
+                "question_matchee": None,
+                "trouve": False
+            }
+\end{lstlisting}
+
+La recherche SQL exploite l'opérateur de distance cosinus \texttt{<=>}. Le score de similarité cosinus est calculé par la relation $Score = 1 - (A \Leftrightarrow B)$.
+
+\begin{lstlisting}[language=Python, caption=Interrogation SQL via pgvector (db.py)]
+def search_by_vector(embedding: np.ndarray, seuil: float = 0.4) -> dict | None:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT answer, question, 1 - (embedding <=> %s) AS score
+            FROM faqs
+            WHERE embedding IS NOT NULL
+            ORDER BY embedding <=> %s
+            LIMIT 1
+            """,
+            (embedding, embedding)
+        )
+        row = cursor.fetchone()
+        if row and row[2] >= seuil:
+            return {
+                "answer": row[0],
+                "question": row[1],
+                "score": round(float(row[2]), 4)
+            }
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+\end{lstlisting}
+
+\subsubsection{Synchronisation des Données d'Administration (/reload)}
+Lorsqu'un administrateur ajoute ou met à jour une FAQ depuis le Dashboard d'administration Angular, la modification est d'abord persistée en base via l'API REST CRUD de Spring Boot. Le backend Spring Boot déclenche alors une requête HTTP POST asynchrone vers l'endpoint \texttt{/reload} de l'API Flask. 
+
+Le serveur Flask charge le modèle de Transformer, extrait les questions mises à jour de PostgreSQL, calcule leurs nouveaux embeddings et met à jour la base de données. Cela élimine tout besoin de redémarrer le système pour actualiser sa base de connaissances sémantiques.
+
+\clearpage
+
+% ==========================================
+\section[Comparaison des Versions]{Comparaison Systématique des Versions}
+% ==========================================
+
+Ce tableau résume la progression d'ingénierie entre les trois architectures du chatbot universitaire :
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{3.5cm}p{3.5cm}p{3.5cm}p{4cm}}
+\toprule
+\textbf{Critère} & \textbf{V1 (Mots-clés)} & \textbf{V2 (TF-IDF)} & \textbf{V3 (pgvector \& LLM)} \\
+\midrule
+\rowcolor{gray!10}
+\textbf{Compréhension sémantique} & Aucune (correspondance exacte de chaînes). & Partielle (analyse lexicale, fréquence des termes). & Profonde (compréhension des concepts latents, synonymie). \\
+\textbf{Gestion des synonymes} & Manuelle (définition rigide de listes de mots-clés). & Impossible si aucun terme lexical n'est partagé. & Native (modélisation dans l'espace vectoriel d'embedding). \\
+\rowcolor{gray!10}
+\textbf{Consommation RAM} & Négligeable. & Élevée (chargement global du corpus FAQ en RAM). & Légère (uniquement le modèle d'encodage chargé). \\
+\textbf{Scalabilité en base} & Excellent (requêtes indexées standards B-Tree). & Très faible (calculs matriciels locaux en Python). & Excellente (Indexation HNSW dans PostgreSQL en $O(\log N)$). \\
+\rowcolor{gray!10}
+\textbf{Support multilingue} & Limité aux variations exactes configurées. & Uniquement pour la langue configurée dans le tokenizer. & Natif (modèle multilingue supportant 50+ langues). \\
+\textbf{Résilience architecturale} & Service monolithique classique. & Risque élevé de plantage si fuites mémoire dans Flask. & Dégradation gracieuse automatique intégrée par l'API Gateway. \\
+\bottomrule
+\end{tabular}
+\caption{Tableau comparatif détaillé des versions du chatbot}
+\end{table}
+
+\subsection{Résultats de Tests Empiriques}
+Afin de valider la supériorité sémantique de la V3, les trois systèmes ont été confrontés à des requêtes tests réelles d'étudiants.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{3.5cm}p{3.5cm}p{4cm}p{3.5cm}}
+\toprule
+\textbf{Requête utilisateur} & \textbf{Résultat V1} & \textbf{Résultat V2 (TF-IDF)} & \textbf{Résultat V3 (pgvector)} \\
+\midrule
+\rowcolor{gray!10}
+\textit{«~horaires bib~»} & \cross{} Non compris (pas de mot-clé exact). & \cross{} Non compris (score similarity $<$ 0.3). & \checkmarktext{} Bibliothèque (Score : 0.42, synonyme capturé). \\
+\textit{«~aide financiere etudiant~»} & \cross{} Non compris (pas de mot-clé). & \cross{} Faux positif (médical car mot «~étudiant~» dominant). & \checkmarktext{} Bourse Minhaty (Score : 0.75, lien sémantique). \\
+\rowcolor{gray!10}
+\textit{«~Je voudrais m'inscrire~»} & \cross{} Non compris. & \checkmarktext{} Réinscription (Score : 0.53, lemmatisation ok). & \checkmarktext{} Réinscription (Score : 0.78, sémantique). \\
+\bottomrule
+\end{tabular}
+\caption{Comparaison des résultats de recherche sémantique}
+\end{table}
+
+\clearpage
+
+% ==========================================
+\section[Conclusion]{Conclusion et Perspectives}
+% ==========================================
+
+L'intégration de la recherche vectorielle via \textbf{pgvector} et un modèle de transformeur multilingue de type \textbf{sentence-transformers} représente une avancée d'ingénierie logicielle majeure pour le Chatbot de l'EMI. En déportant la logique de calcul de similarité directement dans le moteur de base de données PostgreSQL et en configurant un index de type graphe \textbf{HNSW}, le système s'affranchit des contraintes de mémoire de la version V2, permettant d'envisager une base de connaissances comptant des dizaines de milliers de FAQs.
+
+De plus, l'architecture découplée mise en place (Spring Boot jouant le rôle de passerelle et de filet de sécurité avec fallback automatique) garantit que les étudiants reçoivent toujours une réponse (fût-elle issue de la logique de mots-clés simplifiée) même en cas d'incident technique sur le microservice sémantique.
+
+Les perspectives d'évolution future comprennent :
+\begin{enumerate}
+    \item \textbf{Fine-Tuning du Modèle} : Ré-entraîner le modèle MiniLM sur un corpus d'expressions purement académiques et dialectales marocaines afin d'affiner la précision des embeddings.
+    \item \textbf{Génération de Réponses (RAG)} : Coupler les vecteurs trouvés avec un Modèle de Langage de type LLM local pour générer des réponses rédigées de manière plus dynamique et fluide plutôt que de retourner des réponses statiques prédéfinies.
+    \item \textbf{Analyse Vocale} : Ajouter un service de Speech-to-Text (STT) pour permettre aux étudiants de poser des questions par commande vocale.
+\end{enumerate}
+
+\end{document}

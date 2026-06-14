@@ -65,60 +65,66 @@ FAQS = [
     ),
 ]
 
-# ── Connection ──────────────────────────────────────────────────────
-conn = psycopg2.connect(
-    host="84.8.219.24",
-    port="5432",
-    dbname="university_chatbot",
-    user="chatbot_user",
-    password="mysecretpassword",
-    options="-c client_encoding=UTF8"
-)
-cursor = conn.cursor()
+# ── Execution ───────────────────────────────────────────────────────
+def main():
+    conn = psycopg2.connect(
+        host="84.8.219.24",
+        port="5432",
+        dbname="university_chatbot",
+        user="chatbot_user",
+        password="mysecretpassword",
+        options="-c client_encoding=UTF8"
+    )
+    cursor = conn.cursor()
 
-try:
-    # 1. Clear all tables (junction first to respect FK constraints)
-    print("[INFO] Clearing existing data...")
-    cursor.execute("DELETE FROM faq_keywords")
-    cursor.execute("DELETE FROM faqs")
-    cursor.execute("DELETE FROM keywords")
-    print("[OK] Tables cleared.")
+    try:
+        # 1. Clear all tables (junction first to respect FK constraints)
+        print("[INFO] Clearing existing data...")
+        cursor.execute("DELETE FROM faq_keywords")
+        cursor.execute("DELETE FROM faqs")
+        cursor.execute("DELETE FROM keywords")
+        print("[OK] Tables cleared.")
 
-    # 2. Insert FAQs and keywords
-    print("\n[INFO] Inserting original 8 FAQs...")
-    for (faq_id, question, answer, keywords) in FAQS:
-        # Insert FAQ with explicit ID
-        cursor.execute(
-            "INSERT INTO faqs (id, question, answer) VALUES (%s, %s, %s)",
-            (faq_id, question, answer)
-        )
-
-        for word in keywords:
-            # Insert keyword (ignore if already exists)
+        # 2. Insert FAQs and keywords
+        print("\n[INFO] Inserting original 8 FAQs...")
+        for (faq_id, question, answer, keywords) in FAQS:
+            # Insert FAQ with explicit ID
             cursor.execute(
-                "INSERT INTO keywords (word) VALUES (%s) ON CONFLICT (word) DO NOTHING",
-                (word,)
-            )
-            # Get keyword ID
-            cursor.execute("SELECT id FROM keywords WHERE word = %s", (word,))
-            keyword_id = cursor.fetchone()[0]
-
-            # Link FAQ <-> keyword
-            cursor.execute(
-                "INSERT INTO faq_keywords (faq_id, keyword_id) VALUES (%s, %s)",
-                (faq_id, keyword_id)
+                "INSERT INTO faqs (id, question, answer) VALUES (%s, %s, %s)",
+                (faq_id, question, answer)
             )
 
-        print(f"  [{faq_id}] OK - {question}")
+            for word in keywords:
+                # Insert keyword (ignore if already exists)
+                cursor.execute(
+                    "INSERT INTO keywords (word) VALUES (%s) ON CONFLICT (word) DO NOTHING",
+                    (word,)
+                )
+                # Get keyword ID
+                cursor.execute("SELECT id FROM keywords WHERE word = %s", (word,))
+                keyword_id = cursor.fetchone()[0]
 
-    conn.commit()
-    print(f"\n[DONE] 8 FAQs inserted with correct UTF-8 encoding.")
+                # Link FAQ <-> keyword
+                cursor.execute(
+                    "INSERT INTO faq_keywords (faq_id, keyword_id) VALUES (%s, %s)",
+                    (faq_id, keyword_id)
+                )
 
-except Exception as e:
-    conn.rollback()
-    print(f"\n[ERROR] {e}")
-finally:
-    cursor.close()
-    conn.close()
+            print(f"  [{faq_id}] OK - {question}")
+
+        conn.commit()
+        print(f"\n[DONE] 8 FAQs inserted with correct UTF-8 encoding.")
+
+    except Exception as e:
+        conn.rollback()
+        print(f"\n[ERROR] {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
+
 
 

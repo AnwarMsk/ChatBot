@@ -1,10 +1,5 @@
 import pytest
-
-try:
-    from pydantic.v1 import StrictInt, StrictStr
-except ImportError:
-    from pydantic import StrictInt, StrictStr  # type: ignore
-
+from pydantic import StrictInt, StrictStr
 from thinc.api import ConfigValidationError, Linear, Model
 
 import spacy
@@ -279,20 +274,17 @@ def test_pipe_factories_wrong_formats():
     with pytest.raises(ValueError):
         # Decorator is not called
         @Language.component
-        def component(foo: int, bar: str):
-            ...
+        def component(foo: int, bar: str): ...
 
     with pytest.raises(ValueError):
         # Decorator is not called
         @Language.factory
-        def factory1(foo: int, bar: str):
-            ...
+        def factory1(foo: int, bar: str): ...
 
     with pytest.raises(ValueError):
         # Factory function is missing "nlp" and "name" arguments
         @Language.factory("test_pipe_factories_missing_args")
-        def factory2(foo: int, bar: str):
-            ...
+        def factory2(foo: int, bar: str): ...
 
 
 def test_pipe_factory_meta_config_cleanup():
@@ -329,8 +321,7 @@ def test_pipe_factories_empty_dict_default():
     name = "test_pipe_factories_empty_dict_default"
 
     @Language.factory(name, default_config={"foo": {}})
-    def factory(nlp: Language, name: str, foo: dict):
-        ...
+    def factory(nlp: Language, name: str, foo: dict): ...
 
     nlp = Language()
     nlp.create_pipe(name)
@@ -549,11 +540,9 @@ def test_pipe_factories_from_source_config():
 
 
 class PipeFactoriesIdempotent:
-    def __init__(self, nlp, name):
-        ...
+    def __init__(self, nlp, name): ...
 
-    def __call__(self, doc):
-        ...
+    def __call__(self, doc): ...
 
 
 @pytest.mark.parametrize(

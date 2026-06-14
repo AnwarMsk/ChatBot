@@ -33,8 +33,15 @@ public class ChatController {
             return Map.of("answer", "Veuillez poser une question.", "degraded", false);
         }
 
-        // ── V2 : NLP semantic search (Flask microservice) ──────────────
-        Optional<String> nlpAnswer = nlpService.askNlp(question);
+        boolean degraded = false;
+        Optional<String> nlpAnswer = Optional.empty();
+        try {
+            // ── V2 : NLP semantic search (Flask microservice) ──────────────
+            nlpAnswer = nlpService.askNlp(question);
+        } catch (projet.emi.ai.chatbotuniversitaire.exception.NlpServiceUnavailableException e) {
+            degraded = true;
+        }
+
         if (nlpAnswer.isPresent()) {
             return buildResponse(nlpAnswer.get(), false);
         }
@@ -48,13 +55,13 @@ public class ChatController {
         for (String word : words) {
             List<Faq> results = faqRepository.findByKeyword(word);
             if (!results.isEmpty()) {
-                // Found a V1 match — return it with degraded=true so the UI can warn the user
-                return buildResponse(results.get(0).getAnswer(), true);
+                // Found a V1 match — return it with degraded=true only if service was unreachable
+                return buildResponse(results.get(0).getAnswer(), degraded);
             }
         }
 
         // Nothing found in either V1 or V2
-        return buildResponse("Désolé, je n'ai pas trouvé d'information sur ce sujet. Veuillez contacter la scolarité de l'EMI.", false);
+        return buildResponse("Désolé, je n'ai pas trouvé d'information sur ce sujet. Veuillez contacter la scolarité de l'EMI.", degraded);
     }
 
     private Map<String, Object> buildResponse(String answer, boolean degraded) {

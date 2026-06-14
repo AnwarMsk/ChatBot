@@ -4,13 +4,11 @@ from thinc.api import Model, chain, with_array
 from thinc.types import Floats1d, Floats2d
 
 from ...tokens import Doc
-from ...util import registry
 
 InT = List[Doc]
 OutT = Floats2d
 
 
-@registry.architectures("spacy.SpanFinder.v1")
 def build_finder_model(
     tok2vec: Model[InT, List[Floats2d]], scorer: Model[OutT, OutT]
 ) -> Model[InT, OutT]:

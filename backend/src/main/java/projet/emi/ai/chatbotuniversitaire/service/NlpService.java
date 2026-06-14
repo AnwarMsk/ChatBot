@@ -61,7 +61,7 @@ public class NlpService {
             // Flask is down, timed out, or unreachable
             log.warn("NLP service unreachable at {} — falling back to V1. Reason: {}",
                     nlpServiceUrl, e.getMessage());
-            return Optional.empty();
+            throw new projet.emi.ai.chatbotuniversitaire.exception.NlpServiceUnavailableException("NLP service unreachable", e);
         }
     }
 

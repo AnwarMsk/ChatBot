@@ -2,14 +2,12 @@ import functools
 import inspect
 import types
 import warnings
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
 
 from thinc.layers import with_nvtx_range
-from thinc.model import Model, wrap_model_recursive
 from thinc.util import use_nvtx_range
 
 from ..errors import Warnings
-from ..util import registry
 
 if TYPE_CHECKING:
     # This lets us add type hints for mypy etc. without causing circular imports
@@ -50,7 +48,6 @@ def models_with_nvtx_range(nlp, forward_color: int, backprop_color: int):
     return nlp
 
 
-@registry.callbacks("spacy.models_with_nvtx_range.v1")
 def create_models_with_nvtx_range(
     forward_color: int = -1, backprop_color: int = -1
 ) -> Callable[["Language"], "Language"]:
@@ -110,7 +107,6 @@ def pipes_with_nvtx_range(
     return nlp
 
 
-@registry.callbacks("spacy.models_and_pipes_with_nvtx_range.v1")
 def create_models_and_pipes_with_nvtx_range(
     forward_color: int = -1,
     backprop_color: int = -1,

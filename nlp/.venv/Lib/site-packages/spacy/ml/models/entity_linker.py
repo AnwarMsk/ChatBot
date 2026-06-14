@@ -23,12 +23,10 @@ from ...kb import (
     get_candidates_batch,
 )
 from ...tokens import Doc, Span
-from ...util import registry
 from ...vocab import Vocab
 from ..extract_spans import extract_spans
 
 
-@registry.architectures("spacy.EntityLinker.v2")
 def build_nel_encoder(
     tok2vec: Model, nO: Optional[int] = None
 ) -> Model[List[Doc], Floats2d]:
@@ -92,7 +90,6 @@ def span_maker_forward(model, docs: List[Doc], is_train) -> Tuple[Ragged, Callab
     return out, lambda x: []
 
 
-@registry.misc("spacy.KBFromFile.v1")
 def load_kb(
     kb_path: Path,
 ) -> Callable[[Vocab], KnowledgeBase]:
@@ -104,7 +101,6 @@ def load_kb(
     return kb_from_file
 
 
-@registry.misc("spacy.EmptyKB.v2")
 def empty_kb_for_config() -> Callable[[Vocab, int], KnowledgeBase]:
     def empty_kb_factory(vocab: Vocab, entity_vector_length: int):
         return InMemoryLookupKB(vocab=vocab, entity_vector_length=entity_vector_length)
@@ -112,7 +108,6 @@ def empty_kb_for_config() -> Callable[[Vocab, int], KnowledgeBase]:
     return empty_kb_factory
 
 
-@registry.misc("spacy.EmptyKB.v1")
 def empty_kb(
     entity_vector_length: int,
 ) -> Callable[[Vocab], KnowledgeBase]:
@@ -122,12 +117,10 @@ def empty_kb(
     return empty_kb_factory
 
 
-@registry.misc("spacy.CandidateGenerator.v1")
 def create_candidates() -> Callable[[KnowledgeBase, Span], Iterable[Candidate]]:
     return get_candidates
 
 
-@registry.misc("spacy.CandidateBatchGenerator.v1")
 def create_candidates_batch() -> Callable[
     [KnowledgeBase, Iterable[Span]], Iterable[Iterable[Candidate]]
 ]:

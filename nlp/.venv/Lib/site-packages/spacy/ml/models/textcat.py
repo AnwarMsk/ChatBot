@@ -36,7 +36,6 @@ from thinc.types import ArrayXd, Floats2d
 from ...attrs import ORTH
 from ...errors import Errors
 from ...tokens import Doc
-from ...util import registry
 from ..extract_ngrams import extract_ngrams
 from ..staticvectors import StaticVectors
 from .tok2vec import get_tok2vec_width
@@ -44,7 +43,6 @@ from .tok2vec import get_tok2vec_width
 NEG_VALUE = -5000
 
 
-@registry.architectures("spacy.TextCatCNN.v2")
 def build_simple_cnn_text_classifier(
     tok2vec: Model, exclusive_classes: bool, nO: Optional[int] = None
 ) -> Model[List[Doc], Floats2d]:
@@ -72,7 +70,6 @@ def resize_and_set_ref(model, new_nO, resizable_layer):
     return model
 
 
-@registry.architectures("spacy.TextCatBOW.v2")
 def build_bow_text_classifier(
     exclusive_classes: bool,
     ngram_size: int,
@@ -88,7 +85,6 @@ def build_bow_text_classifier(
     )
 
 
-@registry.architectures("spacy.TextCatBOW.v3")
 def build_bow_text_classifier_v3(
     exclusive_classes: bool,
     ngram_size: int,
@@ -142,7 +138,6 @@ def _build_bow_text_classifier(
     return model
 
 
-@registry.architectures("spacy.TextCatEnsemble.v2")
 def build_text_classifier_v2(
     tok2vec: Model[List[Doc], List[Floats2d]],
     linear_model: Model[List[Doc], Floats2d],
@@ -200,7 +195,6 @@ def init_ensemble_textcat(model, X, Y) -> Model:
     return model
 
 
-@registry.architectures("spacy.TextCatLowData.v1")
 def build_text_classifier_lowdata(
     width: int, dropout: Optional[float], nO: Optional[int] = None
 ) -> Model[List[Doc], Floats2d]:
@@ -221,7 +215,6 @@ def build_text_classifier_lowdata(
     return model
 
 
-@registry.architectures("spacy.TextCatParametricAttention.v1")
 def build_textcat_parametric_attention_v1(
     tok2vec: Model[List[Doc], List[Floats2d]],
     exclusive_classes: bool,
@@ -294,7 +287,6 @@ def _init_parametric_attention_with_residual_nonlinear(model, X, Y) -> Model:
     return model
 
 
-@registry.architectures("spacy.TextCatReduce.v1")
 def build_reduce_text_classifier(
     tok2vec: Model,
     exclusive_classes: bool,
