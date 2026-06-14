@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING, Callable, Optional
 
 from ..errors import Errors
-from ..util import load_model, logger, registry
+from ..util import load_model, logger
 
 if TYPE_CHECKING:
     from ..language import Language
 
 
-@registry.callbacks("spacy.copy_from_base_model.v1")
 def create_copy_from_base_model(
     tokenizer: Optional[str] = None,
     vocab: Optional[str] = None,

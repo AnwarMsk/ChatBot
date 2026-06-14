@@ -82,6 +82,11 @@ def bn_tokenizer():
 
 
 @pytest.fixture(scope="session")
+def bo_tokenizer():
+    return get_lang_class("bo")().tokenizer
+
+
+@pytest.fixture(scope="session")
 def ca_tokenizer():
     return get_lang_class("ca")().tokenizer
 
@@ -205,6 +210,16 @@ def hi_tokenizer():
 @pytest.fixture(scope="session")
 def hr_tokenizer():
     return get_lang_class("hr")().tokenizer
+
+
+@pytest.fixture(scope="session")
+def ht_tokenizer():
+    return get_lang_class("ht")().tokenizer
+
+
+@pytest.fixture(scope="session")
+def ht_vocab():
+    return get_lang_class("ht")().vocab
 
 
 @pytest.fixture

@@ -4,10 +4,8 @@ from thinc.api import Model
 from thinc.types import Floats2d
 
 from ..tokens import Doc
-from ..util import registry
 
 
-@registry.layers("spacy.CharEmbed.v1")
 def CharacterEmbed(nM: int, nC: int) -> Model[List[Doc], List[Floats2d]]:
     # nM: Number of dimensions per character. nC: Number of characters.
     return Model(

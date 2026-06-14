@@ -64,7 +64,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
         this.messages.push({
           text: response.answer,
           sender: 'BOT',
-          timestamp: new Date()
+          timestamp: new Date(),
+          degraded: response.degraded ?? false
         });
       },
       error: (err) => {

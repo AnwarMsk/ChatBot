@@ -24,12 +24,12 @@ from spacy.pipeline.textcat_multilabel import (
 )
 from spacy.pipeline.tok2vec import DEFAULT_TOK2VEC_MODEL
 from spacy.scorer import Scorer
+from spacy.tests.tok2vec import build_lazy_init_tok2vec as _  # noqa: F401
 from spacy.tokens import Doc, DocBin
 from spacy.training import Example
 from spacy.training.initialize import init_nlp
 
 # Ensure that the architecture gets added to the registry.
-from ..tok2vec import build_lazy_init_tok2vec as _
 from ..util import make_tempdir
 
 TRAIN_DATA_SINGLE_LABEL = [
@@ -260,7 +260,7 @@ labels = ['label1', 'label2']
 )
 @pytest.mark.issue(6908)
 def test_issue6908(component_name):
-    """Test intializing textcat with labels in a list"""
+    """Test initializing textcat with labels in a list"""
 
     def create_data(out_file):
         nlp = spacy.blank("en")
@@ -874,7 +874,8 @@ def test_textcat_eval_missing(multi_label: bool, spring_p: float):
 def test_textcat_loss(multi_label: bool, expected_loss: float):
     """
     multi-label: the missing 'spring' in gold_doc_2 doesn't incur an increase in loss
-    exclusive labels: the missing 'spring' in gold_doc_2 is interpreted as 0.0 and adds to the loss"""
+    exclusive labels: the missing 'spring' in gold_doc_2 is interpreted as 0.0 and adds to the loss
+    """
     train_examples = []
     nlp = English()
 

@@ -4,10 +4,8 @@ from thinc.api import Model, Softmax_v2, chain, with_array, zero_init
 from thinc.types import Floats2d
 
 from ...tokens import Doc
-from ...util import registry
 
 
-@registry.architectures("spacy.Tagger.v2")
 def build_tagger_model(
     tok2vec: Model[List[Doc], List[Floats2d]], nO: Optional[int] = None, normalize=False
 ) -> Model[List[Doc], List[Floats2d]]:

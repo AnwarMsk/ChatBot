@@ -1,8 +1,12 @@
 package projet.emi.ai.chatbotuniversitaire.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "keywords")
 public class Keyword {
@@ -15,6 +19,4 @@ public class Keyword {
 
     @ManyToMany(mappedBy = "keywords")
     private Set<Faq> faqs;
-
-    // Générez les Getters et Setters (Alt+Insert dans IntelliJ)
 }

@@ -47,7 +47,7 @@ cdef class PhraseMatcher:
         self._terminal_hash = 826361138722620965
         map_init(self.mem, self.c_map, 8)
 
-        if isinstance(attr, (int, long)):
+        if isinstance(attr, int):
             self.attr = attr
         else:
             if attr is None:
@@ -57,7 +57,7 @@ cdef class PhraseMatcher:
                 attr = "ORTH"
             if attr == "IS_SENT_START":
                 attr = "SENT_START"
-            if attr.lower() not in TokenPattern().dict():
+            if attr.lower() not in TokenPattern().model_dump():
                 raise ValueError(Errors.E152.format(attr=attr))
             self.attr = IDS.get(attr)
 

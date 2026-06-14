@@ -1,5 +1,5 @@
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Callable, Iterable, List, Optional, Tuple, cast
 
 import numpy
 from thinc.api import (
@@ -21,7 +21,7 @@ from thinc.types import Floats2d, Ints1d
 
 from ...attrs import ID, ORTH
 from ...errors import Errors
-from ...util import OOV_RANK, registry
+from ...util import OOV_RANK
 from ...vectors import Mode as VectorsMode
 
 if TYPE_CHECKING:
@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from ...vocab import Vocab  # noqa: F401
 
 
-@registry.architectures("spacy.PretrainVectors.v1")
 def create_pretrain_vectors(
     maxout_pieces: int, hidden_size: int, loss: str
 ) -> Callable[["Vocab", Model], Model]:
@@ -57,7 +56,6 @@ def create_pretrain_vectors(
     return create_vectors_objective
 
 
-@registry.architectures("spacy.PretrainCharacters.v1")
 def create_pretrain_characters(
     maxout_pieces: int, hidden_size: int, n_characters: int
 ) -> Callable[["Vocab", Model], Model]:
@@ -201,7 +199,7 @@ def build_masked_language_model(
         layers=[wrapped_model],
         init=mlm_initialize,
         refs={"wrapped": wrapped_model},
-        dims={dim: None for dim in wrapped_model.dim_names},
+        dims=dict.fromkeys(wrapped_model.dim_names),
     )
     mlm_model.set_ref("wrapped", wrapped_model)
     return mlm_model

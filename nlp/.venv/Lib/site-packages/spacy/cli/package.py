@@ -21,15 +21,56 @@ from ._util import SDIST_SUFFIX, WHEEL_SUFFIX, Arg, Opt, app, string_to_list
 @app.command("package")
 def package_cli(
     # fmt: off
-    input_dir: Path = Arg(..., help="Directory with pipeline data", exists=True, file_okay=False),
-    output_dir: Path = Arg(..., help="Output parent directory", exists=True, file_okay=False),
-    code_paths: str = Opt("", "--code", "-c", help="Comma-separated paths to Python file with additional code (registered functions) to be included in the package"),
-    meta_path: Optional[Path] = Opt(None, "--meta-path", "--meta", "-m", help="Path to meta.json", exists=True, dir_okay=False),
-    create_meta: bool = Opt(False, "--create-meta", "-C", help="Create meta.json, even if one exists"),
-    name: Optional[str] = Opt(None, "--name", "-n", help="Package name to override meta"),
-    version: Optional[str] = Opt(None, "--version", "-v", help="Package version to override meta"),
-    build: str = Opt("sdist", "--build", "-b", help="Comma-separated formats to build: sdist and/or wheel, or none."),
-    force: bool = Opt(False, "--force", "-f", "-F", help="Force overwriting existing data in output directory"),
+    input_dir: Path = Arg(
+        ..., help="Directory with pipeline data", exists=True, file_okay=False
+    ),
+    output_dir: Path = Arg(
+        ..., help="Output parent directory", exists=True, file_okay=False
+    ),
+    code_paths: str = Opt(
+        "",
+        "--code",
+        "-c",
+        help="Comma-separated paths to Python file with additional code (registered functions) to be included in the package",
+    ),
+    meta_path: Optional[Path] = Opt(
+        None,
+        "--meta-path",
+        "--meta",
+        "-m",
+        help="Path to meta.json",
+        exists=True,
+        dir_okay=False,
+    ),
+    create_meta: bool = Opt(
+        False, "--create-meta", "-C", help="Create meta.json, even if one exists"
+    ),
+    name: Optional[str] = Opt(
+        None, "--name", "-n", help="Package name to override meta"
+    ),
+    version: Optional[str] = Opt(
+        None, "--version", "-v", help="Package version to override meta"
+    ),
+    build: str = Opt(
+        "sdist",
+        "--build",
+        "-b",
+        help="Comma-separated formats to build: sdist and/or wheel, or none.",
+    ),
+    force: bool = Opt(
+        False,
+        "--force",
+        "-f",
+        "-F",
+        help="Force overwriting existing data in output directory",
+    ),
+    require_parent: bool = Opt(
+        True,
+        "--require-parent/--no-require-parent",
+        "-R",
+        "-R",
+        help="Include the parent package (e.g. spacy) in the requirements",
+    ),
     # fmt: on
 ):
     """
@@ -60,6 +101,7 @@ def package_cli(
         create_sdist=create_sdist,
         create_wheel=create_wheel,
         force=force,
+        require_parent=require_parent,
         silent=False,
     )
 
@@ -74,6 +116,7 @@ def package(
     create_meta: bool = False,
     create_sdist: bool = True,
     create_wheel: bool = False,
+    require_parent: bool = False,
     force: bool = False,
     silent: bool = True,
 ) -> None:
@@ -113,7 +156,7 @@ def package(
     if not meta_path.exists() or not meta_path.is_file():
         msg.fail("Can't load pipeline meta.json", meta_path, exits=1)
     meta = srsly.read_json(meta_path)
-    meta = get_meta(input_dir, meta)
+    meta = get_meta(input_dir, meta, require_parent=require_parent)
     if meta["requirements"]:
         msg.good(
             f"Including {len(meta['requirements'])} package requirement(s) from "
@@ -186,6 +229,7 @@ def package(
         imports.append(code_path.stem)
         shutil.copy(str(code_path), str(package_path))
     create_file(main_path / "meta.json", srsly.json_dumps(meta, indent=2))
+
     create_file(main_path / "setup.py", TEMPLATE_SETUP)
     create_file(main_path / "MANIFEST.in", TEMPLATE_MANIFEST)
     init_py = TEMPLATE_INIT.format(
@@ -302,6 +346,8 @@ def get_third_party_dependencies(
                 modules.add(func_info["module"].split(".")[0])  # type: ignore[union-attr]
     dependencies = []
     for module_name in modules:
+        if module_name == about.__title__:
+            continue
         if module_name in distributions:
             dist = distributions.get(module_name)
             if dist:
@@ -332,7 +378,9 @@ def create_file(file_path: Path, contents: str) -> None:
 
 
 def get_meta(
-    model_path: Union[str, Path], existing_meta: Dict[str, Any]
+    model_path: Union[str, Path],
+    existing_meta: Dict[str, Any],
+    require_parent: bool = False,
 ) -> Dict[str, Any]:
     meta: Dict[str, Any] = {
         "lang": "en",
@@ -361,6 +409,8 @@ def get_meta(
     existing_reqs = [util.split_requirement(req)[0] for req in meta["requirements"]]
     reqs = get_third_party_dependencies(nlp.config, exclude=existing_reqs)
     meta["requirements"].extend(reqs)
+    if require_parent and about.__title__ not in meta["requirements"]:
+        meta["requirements"].append(about.__title__ + meta["spacy_version"])
     return meta
 
 
@@ -400,7 +450,7 @@ def generate_readme(meta: Dict[str, Any]) -> str:
     pipeline = ", ".join([md.code(p) for p in meta.get("pipeline", [])])
     components = ", ".join([md.code(p) for p in meta.get("components", [])])
     vecs = meta.get("vectors", {})
-    vectors = f"{vecs.get('keys', 0)} keys, {vecs.get('vectors', 0)} unique vectors ({ vecs.get('width', 0)} dimensions)"
+    vectors = f"{vecs.get('keys', 0)} keys, {vecs.get('vectors', 0)} unique vectors ({vecs.get('width', 0)} dimensions)"
     author = meta.get("author") or "n/a"
     notes = meta.get("notes", "")
     license_name = meta.get("license")
@@ -459,7 +509,7 @@ def _format_accuracy(data: Dict[str, Any], exclude: List[str] = ["speed"]) -> st
     md = MarkdownRenderer()
     scalars = [(k, v) for k, v in data.items() if isinstance(v, (int, float))]
     scores = [
-        (md.code(acc.upper()), f"{score*100:.2f}")
+        (md.code(acc.upper()), f"{score * 100:.2f}")
         for acc, score in scalars
         if acc not in exclude
     ]
@@ -478,9 +528,7 @@ def _format_label_scheme(data: Dict[str, Any]) -> str:
         if not labels:
             continue
         col1 = md.bold(md.code(pipe))
-        col2 = ", ".join(
-            [md.code(str(label).replace("|", "\\|")) for label in labels]
-        )  # noqa: W605
+        col2 = ", ".join([md.code(str(label).replace("|", "\\|")) for label in labels])  # noqa: W605
         label_data.append((col1, col2))
         n_labels += len(labels)
         n_pipes += 1
@@ -535,8 +583,11 @@ def list_files(data_dir):
 
 
 def list_requirements(meta):
-    parent_package = meta.get('parent_package', 'spacy')
-    requirements = [parent_package + meta['spacy_version']]
+    # Up to version 3.7, we included the parent package
+    # in requirements by default. This behaviour is removed
+    # in 3.8, with a setting to include the parent package in
+    # the requirements list in the meta if desired.
+    requirements = []
     if 'setup_requires' in meta:
         requirements += meta['setup_requires']
     if 'requirements' in meta:

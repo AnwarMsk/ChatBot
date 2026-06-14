@@ -1,7 +1,7 @@
 import warnings
-from typing import Callable, List, Optional, Sequence, Tuple, cast
+from typing import Callable, List, Optional, Tuple, cast
 
-from thinc.api import Model, Ops, registry
+from thinc.api import Model, Ops
 from thinc.initializers import glorot_uniform_init
 from thinc.types import Floats1d, Floats2d, Ints1d, Ragged
 from thinc.util import partial
@@ -13,14 +13,13 @@ from ..vectors import Mode, Vectors
 from ..vocab import Vocab
 
 
-@registry.layers("spacy.StaticVectors.v2")
 def StaticVectors(
     nO: Optional[int] = None,
     nM: Optional[int] = None,
     *,
     dropout: Optional[float] = None,
     init_W: Callable = glorot_uniform_init,
-    key_attr: str = "ORTH"
+    key_attr: str = "ORTH",
 ) -> Model[List[Doc], Ragged]:
     """Embed Doc objects with their vocab's vectors table, applying a learned
     linear projection to control the dimensionality. If a dropout rate is

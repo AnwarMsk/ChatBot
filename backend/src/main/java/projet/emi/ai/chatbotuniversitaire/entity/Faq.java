@@ -10,6 +10,7 @@ import java.util.Set;
 @Table(name = "faqs")
 public class Faq {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String question;
     @Setter

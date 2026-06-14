@@ -12,20 +12,19 @@ from typing import (
     Union,
 )
 
-from ..util import minibatch, registry
+from ..util import minibatch
 
 Sizing = Union[Sequence[int], int]
 ItemT = TypeVar("ItemT")
 BatcherT = Callable[[Iterable[ItemT]], Iterable[List[ItemT]]]
 
 
-@registry.batchers("spacy.batch_by_padded.v1")
 def configure_minibatch_by_padded_size(
     *,
     size: Sizing,
     buffer: int,
     discard_oversize: bool,
-    get_length: Optional[Callable[[ItemT], int]] = None
+    get_length: Optional[Callable[[ItemT], int]] = None,
 ) -> BatcherT:
     """Create a batcher that uses the `batch_by_padded_size` strategy.
 
@@ -50,17 +49,16 @@ def configure_minibatch_by_padded_size(
         size=size,
         buffer=buffer,
         discard_oversize=discard_oversize,
-        **optionals
+        **optionals,
     )
 
 
-@registry.batchers("spacy.batch_by_words.v1")
 def configure_minibatch_by_words(
     *,
     size: Sizing,
     tolerance: float,
     discard_oversize: bool,
-    get_length: Optional[Callable[[ItemT], int]] = None
+    get_length: Optional[Callable[[ItemT], int]] = None,
 ) -> BatcherT:
     """Create a batcher that uses the "minibatch by words" strategy.
 
@@ -78,11 +76,10 @@ def configure_minibatch_by_words(
         size=size,
         tolerance=tolerance,
         discard_oversize=discard_oversize,
-        **optionals
+        **optionals,
     )
 
 
-@registry.batchers("spacy.batch_by_sequence.v1")
 def configure_minibatch(
     size: Sizing, get_length: Optional[Callable[[ItemT], int]] = None
 ) -> BatcherT:
@@ -235,6 +232,6 @@ def _batch_by_length(
         batches.append(batch)
     # Check lengths match
     assert sum(len(b) for b in batches) == len(seqs)
-    batches = [list(sorted(batch)) for batch in batches]
+    batches = [sorted(batch) for batch in batches]
     batches.reverse()
     return batches
